@@ -1,8 +1,10 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check, X } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { Check, X, Plus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { BookingForm } from "./BookingForm";
 
 interface Booking {
   id: string;
@@ -37,6 +39,7 @@ const mockBookings: Booking[] = [
 
 export function BookingTable() {
   const { toast } = useToast();
+  const [showBookingForm, setShowBookingForm] = useState(false);
 
   const handleApprove = (id: string) => {
     toast({
@@ -68,50 +71,69 @@ export function BookingTable() {
   };
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Customer</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Time</TableHead>
-            <TableHead>Location</TableHead>
-            <TableHead>Guests</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {mockBookings.map((booking) => (
-            <TableRow key={booking.id}>
-              <TableCell>{booking.customerName}</TableCell>
-              <TableCell>{booking.date}</TableCell>
-              <TableCell>{booking.time}</TableCell>
-              <TableCell>{booking.location}</TableCell>
-              <TableCell>{booking.guests}</TableCell>
-              <TableCell>{getStatusBadge(booking.status)}</TableCell>
-              <TableCell className="space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleApprove(booking.id)}
-                  disabled={booking.status !== "pending"}
-                >
-                  <Check className="h-4 w-4 text-green-600" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleReject(booking.id)}
-                  disabled={booking.status !== "pending"}
-                >
-                  <X className="h-4 w-4 text-red-600" />
-                </Button>
-              </TableCell>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold">Bookings</h2>
+        <Button 
+          onClick={() => setShowBookingForm(!showBookingForm)}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          {showBookingForm ? "Hide Form" : "New Booking"}
+        </Button>
+      </div>
+
+      {showBookingForm && (
+        <div className="mb-6">
+          <BookingForm />
+        </div>
+      )}
+
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Customer</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Time</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead>Guests</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {mockBookings.map((booking) => (
+              <TableRow key={booking.id}>
+                <TableCell>{booking.customerName}</TableCell>
+                <TableCell>{booking.date}</TableCell>
+                <TableCell>{booking.time}</TableCell>
+                <TableCell>{booking.location}</TableCell>
+                <TableCell>{booking.guests}</TableCell>
+                <TableCell>{getStatusBadge(booking.status)}</TableCell>
+                <TableCell className="space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleApprove(booking.id)}
+                    disabled={booking.status !== "pending"}
+                  >
+                    <Check className="h-4 w-4 text-green-600" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleReject(booking.id)}
+                    disabled={booking.status !== "pending"}
+                  >
+                    <X className="h-4 w-4 text-red-600" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
