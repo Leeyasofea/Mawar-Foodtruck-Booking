@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 
 export function CreateEvent() {
   const navigate = useNavigate();
@@ -16,15 +17,28 @@ export function CreateEvent() {
     time: "",
     location: "",
     description: "",
+    max_vendors: 20,
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Event Created",
-      description: "The event has been created successfully.",
-    });
-    navigate("/admin/events");
+    try {
+      const { error } = await supabase.from("events").insert([formData]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Event Created",
+        description: "The event has been created successfully.",
+      });
+      navigate("/admin/events");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleChange = (
@@ -96,6 +110,18 @@ export function CreateEvent() {
               id="description"
               name="description"
               value={formData.description}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="max_vendors">Maximum Vendors</Label>
+            <Input
+              id="max_vendors"
+              name="max_vendors"
+              type="number"
+              value={formData.max_vendors}
               onChange={handleChange}
               required
             />
