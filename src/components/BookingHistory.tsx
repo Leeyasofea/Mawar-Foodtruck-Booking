@@ -13,6 +13,10 @@ interface Booking {
   status: "pending" | "approved" | "rejected";
 }
 
+type SupabaseBooking = Omit<Booking, 'status'> & {
+  status: string;
+};
+
 export function BookingHistory() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const { toast } = useToast();
@@ -42,6 +46,13 @@ export function BookingHistory() {
     };
   }, []);
 
+  const validateBookingStatus = (status: string): "pending" | "approved" | "rejected" => {
+    if (status === "pending" || status === "approved" || status === "rejected") {
+      return status;
+    }
+    return "pending"; // Default fallback
+  };
+
   const fetchBookings = async () => {
     try {
       const { data: user } = await supabase.auth.getUser();
@@ -69,7 +80,13 @@ export function BookingHistory() {
         return;
       }
 
-      setBookings(data || []);
+      // Transform and validate the data
+      const validatedBookings: Booking[] = (data || []).map((booking: SupabaseBooking) => ({
+        ...booking,
+        status: validateBookingStatus(booking.status)
+      }));
+
+      setBookings(validatedBookings);
     } catch (error) {
       console.error('Error:', error);
       toast({
